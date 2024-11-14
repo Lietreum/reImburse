@@ -6,3 +6,273 @@ datasource db {
 generator client {
     provider = "prisma-client-js"
 }
+
+enum RoleName {
+    USER
+    SUPERVISOR
+    ADMIN_KEUANGAN
+    MANAJER_KEUANGAN
+    SUPER_ADMIN
+}
+
+model Role {
+    roleId   Int      @id @default(autoincrement())
+    roleName RoleName
+
+    accounts Account[]
+}
+
+enum BudgetCode {
+    PERSONALIA
+    PERJALANAN_DINAS_DN
+    PERJALANAN_DINAS_LN
+    BEBAN_BAHAN
+    BEBAN_IMPOR_PAJAK
+    BEBAN_BAHAN_PENDUKUNG
+    BEBAN_SUBKONTRAKTOR
+    BEBAN_EKSPEDISI
+    BEBAN_PRODUKSI_LANGSUNG
+    BEBAN_ALIH_DAYA
+    BEBAN_BANGUNAN_PRASARANA
+    BEBAN_PERALATAN_MESIN
+    BEBAN_KANTOR
+    BEBAN_FASILITAS
+    BEBAN_PENYUSUTAN
+    BEBAN_TAK_LANGSUNG
+    ALOKASI_PPH_FINAL
+    CASH_IN
+}
+
+enum TransactionStatus {
+    CASH_IN
+    CASH_OUT
+    HUTANG
+    PIUTANG
+    PENGAJUAN
+    PERTANGGUNGJAWABAN
+}
+
+model Account {
+    userId       Int          @id @default(autoincrement())
+    roleId       Int
+    username     String       @db.VarChar(100)
+    password     String       @db.VarChar(100)
+    divisionName DivisionName
+
+    role                 Role                   @relation(fields: [roleId], references: [roleId])
+    f3Forms              F3Form[]               @relation("user_f3_forms")
+    approvalsSupervised  Approval[]             @relation("supervisor_approval")
+    approvalsAdmin       Approval[]             @relation("finance_admin_approval")
+    approvalsManager     Approval[]             @relation("finance_manager_approval")
+    itemList             ItemList[]
+    reimbursementSummary ReimbursementSummary[]
+
+    notifications Notification[]
+
+    f4Forms  F4Form[]   @relation("user_f4_forms")
+    f5Forms  F5Form[]
+    debtList DebtList[]
+}
+
+enum DivisionName {
+    HC
+    GA
+    LEGAL
+    ENGINEER
+    FINANCE
+    MARKETING
+    SALES
+    PROJECT
+    C_LEVEL
+    PRODUCT
+    CORSE
+}
+
+model UniqueCode {
+    uniqueCode Int      @id @default(autoincrement())
+    f3Forms    F3Form[]
+    f4Forms    F4Form[]
+    f5Forms    F5Form[]
+}
+
+model F3Form {
+    f3Id          Int      @id @default(autoincrement())
+    name          String   @db.VarChar(100)
+    uniqueCode    Int
+    userId        Int
+    projectCode   Int
+    bankAccountId Int
+    itemListId    Int
+    activity      String   @db.VarChar(100)
+    date          DateTime
+    description   String   @db.VarChar(100)
+    evidence      Bytes
+
+    budgetCode        BudgetCode
+    transactionStatus TransactionStatus
+    user              Account           @relation("user_f3_forms", fields: [userId], references: [userId])
+    project           TProjectCode      @relation(fields: [projectCode], references: [projectCode])
+    bankAccount       Bank              @relation(fields: [bankAccountId], references: [bankAccountId])
+    unique            UniqueCode        @relation(fields: [uniqueCode], references: [uniqueCode])
+    itemList          ItemList          @relation(fields: [itemListId], references: [itemListId])
+    approvals         Approval[]
+}
+
+model F4Form {
+    f4Id           Int      @id @default(autoincrement())
+    name           String   @db.VarChar(100)
+    uniqueCode     Int
+    userId         Int
+    projectCode    Int
+    bankAccountId  Int
+    itemListId     Int
+    proposedAmount Decimal
+    activity       String   @db.VarChar(100)
+    date           DateTime
+    description    String   @db.VarChar(100)
+    evidence       Bytes
+
+    budgetCode        BudgetCode
+    transactionStatus TransactionStatus
+    user              Account           @relation("user_f4_forms", fields: [userId], references: [userId])
+    project           TProjectCode      @relation(fields: [projectCode], references: [projectCode])
+    bankAccount       Bank              @relation(fields: [bankAccountId], references: [bankAccountId])
+    itemList          ItemList          @relation(fields: [itemListId], references: [itemListId])
+    unique            UniqueCode        @relation(fields: [uniqueCode], references: [uniqueCode])
+    approvals         Approval[]
+
+    f5Forms F5Form[]
+}
+
+model F5Form {
+    f5Id                Int               @id @default(autoincrement())
+    f5Number            String            @unique @db.VarChar(100)
+    uniqueCode          Int
+    date                DateTime
+    userId              Int
+    f4Id                Int
+    activity            String            @db.VarChar(100)
+    projectCode         Int
+    description         String            @db.VarChar(100)
+    f4Amount            Decimal
+    bankAccountId       Int
+    transactionStatus   TransactionStatus
+    evidence            Bytes
+    totalAccountability Decimal
+    status              ApprovalStatus    @default(PENDING)
+    debtListId          Int?              @unique
+
+    user        Account      @relation(fields: [userId], references: [userId])
+    project     TProjectCode @relation(fields: [projectCode], references: [projectCode])
+    bankAccount Bank         @relation(fields: [bankAccountId], references: [bankAccountId])
+    f4Form      F4Form       @relation(fields: [f4Id], references: [f4Id])
+    unique      UniqueCode   @relation(fields: [uniqueCode], references: [uniqueCode])
+    itemList    ItemList[]
+    approvals   Approval[]
+    debtList    DebtList?    @relation
+}
+
+model DebtList {
+    debtListId  Int      @id @default(autoincrement())
+    userId      Int
+    f5Id        Int?
+    amount      Decimal
+    evidence    Bytes
+    dateCreated DateTime @default(now())
+    status      String   @db.VarChar(100)
+
+    user       Account @relation(fields: [userId], references: [userId])
+    f5Form     F5Form? @relation(fields: [f5FormF5Id], references: [f5Id])
+    f5FormF5Id Int?    @unique
+}
+
+model Approval {
+    approvalId       Int            @id @default(autoincrement())
+    f3FormId         Int
+    supervisorId     Int?
+    financeAdminId   Int?
+    financeManagerId Int?
+    status           ApprovalStatus @default(PENDING)
+    revisionNote     String?
+    rejectionReason  String?
+    dateSubmitted    DateTime       @default(now())
+
+    form           F3Form         @relation(fields: [f3FormId], references: [f3Id])
+    supervisor     Account?       @relation("supervisor_approval", fields: [supervisorId], references: [userId])
+    financeAdmin   Account?       @relation("finance_admin_approval", fields: [financeAdminId], references: [userId])
+    financeManager Account?       @relation("finance_manager_approval", fields: [financeManagerId], references: [userId])
+    notifications  Notification[]
+    f4Form         F4Form?        @relation(fields: [f4FormF4Id], references: [f4Id])
+    f4FormF4Id     Int?
+    f5Form         F5Form?        @relation(fields: [f5FormF5Id], references: [f5Id])
+    f5FormF5Id     Int?
+}
+
+model Notification {
+    notificationId Int      @id @default(autoincrement())
+    userId         Int
+    approvalId     Int
+    message        String   @db.VarChar(255)
+    dateSent       DateTime @default(now())
+    isRead         Boolean  @default(false)
+
+    user     Account  @relation(fields: [userId], references: [userId])
+    approval Approval @relation(fields: [approvalId], references: [approvalId])
+}
+
+enum ApprovalStatus {
+    PENDING
+    SUPERVISOR_REVISED
+    SUPERVISOR_APPROVED
+    SUPERVISOR_REJECTED
+    ADMIN_REVISED
+    ADMIN_APPROVED
+    ADMIN_REJECTED
+    MANAGER_APPROVED
+    MANAGER_REJECTED
+}
+
+model Bank {
+    bankAccountId Int    @id @default(autoincrement())
+    bankAccount   String
+
+    f3Forms F3Form[]
+    f4Form  F4Form[]
+    f5Form  F5Form[]
+}
+
+model TProjectCode {
+    projectCode Int    @id @default(autoincrement())
+    projectName String @db.VarChar(100)
+
+    f3Forms F3Form[]
+    f4Form  F4Form[]
+    f5Form  F5Form[]
+}
+
+model ItemList {
+    itemListId             Int     @id @default(autoincrement())
+    reimbursementSummaryId Int
+    category               String  @db.VarChar(100)
+    expense                Float
+    quantity               Int
+    amount                 Float
+    total                  Decimal
+
+    reimbursementSummary ReimbursementSummary @relation(fields: [reimbursementSummaryId], references: [reimbursementSummaryId])
+    f3Forms              F3Form[]
+    account              Account?             @relation(fields: [accountUserId], references: [userId])
+    accountUserId        Int?
+    f4Form               F4Form[]
+    f5Form               F5Form?              @relation(fields: [f5FormF5Id], references: [f5Id])
+    f5FormF5Id           Int?
+}
+
+model ReimbursementSummary {
+    reimbursementSummaryId Int        @id @default(autoincrement())
+    totalReimburse         Decimal
+    date                   DateTime
+    userId                 Int
+    user                   Account    @relation(fields: [userId], references: [userId])
+    itemListId             ItemList[]
+}

@@ -58,6 +58,7 @@ model Account {
     username     String       @db.VarChar(100)
     password     String       @db.VarChar(100)
     divisionName DivisionName
+    supervisorId Int? // New field for immediate supervisor
 
     role                 Role                   @relation(fields: [roleId], references: [roleId])
     f3Forms              F3Form[]               @relation("user_f3_forms")
@@ -66,12 +67,13 @@ model Account {
     approvalsManager     Approval[]             @relation("finance_manager_approval")
     itemList             ItemList[]
     reimbursementSummary ReimbursementSummary[]
+    notifications        Notification[]
 
-    notifications Notification[]
-
-    f4Forms  F4Form[]   @relation("user_f4_forms")
-    f5Forms  F5Form[]
-    debtList DebtList[]
+    f4Forms      F4Form[]   @relation("user_f4_forms")
+    f5Forms      F5Form[]
+    debtList     DebtList[]
+    supervisor   Account?   @relation("SupervisorAccount", fields: [supervisorId], references: [userId])
+    subordinates Account[]  @relation("SupervisorAccount")
 }
 
 enum DivisionName {

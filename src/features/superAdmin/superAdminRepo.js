@@ -1,15 +1,7 @@
-import prisma from '../../prismaClient.js'; // Ensure you're using ES Modules
+import prisma from '../../prismaClient.js';
 
 export const createAccount = async (data) => {
   return prisma.account.create({ data });
-};
-
-export const findAccountByUsername = async (username) => {
-  return prisma.account.findUnique({ where: { username } });
-};
-
-export const findAccountById = async (userId) => {
-  return prisma.account.findUnique({ where: { userId } });
 };
 
 export const updateAccount = async (userId, data) => {

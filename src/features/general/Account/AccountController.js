@@ -23,8 +23,8 @@ export const loginAccount = async (req, res) => {
     );
 
     // Set the token in a cookie
-    res.cookie('token', token, {
-      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+    res.cookie('authToken', token, {
+      httpOnly: true,
     });
 
     res.json({ message: 'Login successful', user: account });

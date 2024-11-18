@@ -72,11 +72,12 @@ enum ApprovalStatus {
 }
 
 model Account {
-    userId       String       @id @default(uuid())
-    username     String       @unique @db.VarChar(100)
-    password     String       @db.VarChar(100)
-    divisionName DivisionName
-    supervisorId String?
+    userId         String       @id @default(uuid())
+    username       String       @unique @db.VarChar(100)
+    password       String       @db.VarChar(100)
+    profilePicture Bytes?
+    divisionName   DivisionName
+    supervisorId   String?
 
     role                 RoleName
     f3Forms              F3Form[]               @relation("user_f3_forms")

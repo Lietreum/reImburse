@@ -1,15 +1,20 @@
-// authMiddleware.js
+// src/middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
-const authenticateJWT = (req, res, next) => {
-  const token = req.header('token');
-  if (!token) return res.status(403).json({ message: 'Access denied' });
+const authenticateJWTFromCookie = (req, res, next) => {
+  const token = req.cookies.authToken;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
-    req.user = user;
+  if (!token) {
+    return res.status(401).json({ message: 'Authentication token is missing' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user info (userId and role) to the request
     next();
-  });
+  } catch (error) {
+    res.status(403).json({ message: 'Invalid token' });
+  }
 };
 
-export default authenticateJWT;
+export default authenticateJWTFromCookie;

@@ -4,6 +4,7 @@ import cors from 'cors';
 import router from './router/router.js';
 import errorHandler from './middleware/errorHandler.js';
 import notFoundHandler from './middleware/notFoundHandler.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const PORT = process.env.PORT || 3000;  // Use default port if not set
@@ -15,6 +16,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'], // Header yang diizinkan
 };
 
+app.use(cookieParser());
 app.use(cors(corsOptions)); // Middleware CORS
 app.use(express.json()); // Middleware JSON parser
 app.use('/api', router); // Routing utama

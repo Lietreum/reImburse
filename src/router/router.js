@@ -1,17 +1,18 @@
+// src/router/router.js
 import { Router } from 'express';
 import * as superAdmin from '../features/superAdmin/superAdminController.js';
 import * as general from '../features/general/Account/AccountController.js';
-import authenticateJWT from '../middleware/authMiddleware.js';
+import authenticateJWTFromCookie from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-// Super Admin Routes
-router.post('/register', authenticateJWT, superAdmin.createAccount);
-router.put('/edit/:userId', authenticateJWT, superAdmin.updateAccountHandler);
-router.delete('/delete/:userId', authenticateJWT, superAdmin.deleteAccountHandler);
-router.post('/assign-hierarchy', authenticateJWT, superAdmin.assignHierarchy);
-router.get('/hierarchy/:userId', authenticateJWT, superAdmin.getHierarchyByUserId);
-router.get('/reports', authenticateJWT, superAdmin.getAllReports);
+// Super Admin Routes (protected)
+router.post('/register', authenticateJWTFromCookie, superAdmin.createAccount);
+router.put('/edit/:userId', authenticateJWTFromCookie, superAdmin.updateAccountHandler);
+router.delete('/delete/:userId', authenticateJWTFromCookie, superAdmin.deleteAccountHandler);
+router.post('/assign-hirearchy', authenticateJWTFromCookie, superAdmin.assignHierarchy);
+router.get('/hierarchy/:userId', authenticateJWTFromCookie, superAdmin.getHierarchyByUserId);
+router.get('/reports', authenticateJWTFromCookie, superAdmin.getAllReports);
 
 // General Routes
 router.post('/login', general.loginAccount);

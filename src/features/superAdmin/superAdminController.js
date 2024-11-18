@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import * as superAdminService from './superAdminService.js';
 
 const { hash } = bcrypt;
@@ -11,11 +10,11 @@ export const createAccount = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const { username, password, roleId, divisionName } = req.body;
+    const { username, password, role, divisionName } = req.body;
     const newAccount = await superAdminService.registerAccount({
       username,
       password,
-      roleId,
+      role,
       divisionName,
     });
 
@@ -69,6 +68,47 @@ export const deleteAccountHandler = async (req, res) => {
   }
 };
 
+// Assign Supervisor
+export const assignSupervisor = async (req, res) => {
+  try {
+    if (req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
 
+    const { userId, supervisorId } = req.body;
+    const result = await superAdminService.assignSupervisor(userId, supervisorId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
+// Get Hierarchy
+export const getHierarchy = async (req, res) => {
+  try {
+    if (req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const { userId } = req.params;
+    const hierarchy = await superAdminService.getHierarchy(userId);
+    res.status(200).json(hierarchy);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get All Reports
+export const getAllReports = async (req, res) => {
+  try {
+    if (req.user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
+    const reports = await superAdminService.getAllReports();
+    res.status(200).json(reports);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 

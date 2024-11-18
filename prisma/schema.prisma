@@ -47,7 +47,6 @@ enum TransactionStatus {
 
 model Account {
     userId       Int          @id @default(autoincrement())
-    roleId       Int
     username     String       @unique @db.VarChar(100)
     password     String       @db.VarChar(100)
     divisionName DivisionName

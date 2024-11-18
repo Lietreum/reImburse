@@ -12,11 +12,12 @@ export const deleteAccount = async (userId) => {
   return prisma.account.delete({ where: { userId } });
 };
 
-// Supervisor Operations
-export const updateSupervisor = async (userId, supervisorId) => prisma.account.update({
-  where: { userId },
-  data: { supervisorId },
-});
+export const updateSupervisor = async (userId, supervisorId) => {
+  return prisma.account.update({
+    where: { userId },
+    data: { supervisorId },
+  });
+};
 
 export const findUserWithHierarchy = async (userId) => prisma.account.findUnique({
   where: { userId },

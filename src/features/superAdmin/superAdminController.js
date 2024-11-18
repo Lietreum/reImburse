@@ -68,35 +68,42 @@ export const deleteAccountHandler = async (req, res) => {
   }
 };
 
-// Assign Supervisor
-export const assignSupervisor = async (req, res) => {
+export const assignHierarchy = async (req, res) => {
   try {
     if (req.user.role !== 'SUPER_ADMIN') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const { userId, supervisorId } = req.body;
-    const result = await superAdminService.assignSupervisor(userId, supervisorId);
-    res.status(200).json(result);
+    const { userId, supervisorId, financeAdminId, financeManagerId } = req.body;
+
+    const result = await superAdminService.setHierarchy({
+      userId,
+      supervisorId,
+      financeAdminId,
+      financeManagerId,
+    });
+
+    res.status(200).json({ message: 'Hierarchy updated successfully', data: result });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get Hierarchy
-export const getHierarchy = async (req, res) => {
+export const getHierarchyByUserId = async (req, res) => {
   try {
-    if (req.user.role !== 'SUPER_ADMIN') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
-    const { userId } = req.params;
+    const { userId } = req.params; // Dapatkan userId dari parameter URL
     const hierarchy = await superAdminService.getHierarchy(userId);
-    res.status(200).json(hierarchy);
+
+    if (!hierarchy) {
+      return res.status(404).json({ message: 'Hierarchy not found' });
+    }
+
+    res.status(200).json({ message: 'Hierarchy retrieved successfully', data: hierarchy });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get All Reports
 export const getAllReports = async (req, res) => {
@@ -104,7 +111,7 @@ export const getAllReports = async (req, res) => {
     if (req.user.role !== 'SUPER_ADMIN') {
       return res.status(403).json({ message: 'Access denied' });
     }
-    
+
     const reports = await superAdminService.getAllReports();
     res.status(200).json(reports);
   } catch (error) {

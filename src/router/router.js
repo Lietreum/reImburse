@@ -9,8 +9,8 @@ const router = Router();
 router.post('/register', authenticateJWT, superAdmin.createAccount);
 router.put('/edit/:userId', authenticateJWT, superAdmin.updateAccountHandler);
 router.delete('/delete/:userId', authenticateJWT, superAdmin.deleteAccountHandler);
-router.post('/assign-supervisor', authenticateJWT, superAdmin.assignSupervisor);
-router.get('/hierarchy/:userId', authenticateJWT, superAdmin.getHierarchy);
+router.post('/assign-hierarchy', authenticateJWT, superAdmin.assignHierarchy);
+router.get('/hierarchy/:userId', authenticateJWT, superAdmin.getHierarchyByUserId);
 router.get('/reports', authenticateJWT, superAdmin.getAllReports);
 
 // General Routes

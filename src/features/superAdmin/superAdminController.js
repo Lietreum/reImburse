@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import * as superAdminService from './superAdminService.js';
 
 const { hash } = bcrypt;
-
+// turn of this if you hadnt registered super admin account
 // Register Account
 export const createAccount = async (req, res) => {
   try {

@@ -5,7 +5,7 @@ import * as general from '../features/general/Account/AccountController.js';
 import authenticateJWTFromCookie from '../middleware/authMiddleware.js';
 
 const router = Router();
-
+// turn of authenticatejwt if you hadnt registered super admin account or any
 // Super Admin Routes (protected)
 router.post('/register', authenticateJWTFromCookie, superAdmin.createAccount);
 router.put('/edit/:userId', authenticateJWTFromCookie, superAdmin.updateAccountHandler);
